@@ -1,21 +1,89 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import checkvalidate from "../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+
 const Login = () => {
   const [label, setLabel] = useState("Sign In");
   const [isSignUp, setIsSignUp] = useState(false);
   const [errorMessage, seterrorMessage] = useState("");
+  const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleButtonClick = () => {
-    console.log(email.current.value);
-    console.log(password.current.value);
-    const validate = checkvalidate(email.current.value,password.current.value)
+    const validate = checkvalidate(email.current.value, password.current.value);
+    console.log(validate);
     seterrorMessage(validate);
-    
-  }
+    if (validate) return;
+
+    if (isSignUp) {
+      // Sign Up logic here
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          const user = userCredential.user;
+          updateProfile(user, {
+            displayName: name.current.value,
+            photoURL: "https://example.com/jane-q-user/profile.jpg",
+          })
+            .then(() => {
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  displayName: displayName,
+                  photoURL: photoURL,
+                })
+              );
+              navigate("/browse");
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.error("Error creating user:", errorCode, errorMessage);
+          seterrorMessage(errorMessage);
+        });
+    } else {
+      // Sign In logic here
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log(user);
+          navigate("/browse");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode, errorMessage);
+          seterrorMessage(errorMessage);
+        });
+    }
+  };
   return (
-    <div >
+    <div>
       <Header />
       <div className="absolute">
         <img
@@ -25,10 +93,14 @@ const Login = () => {
         />
       </div>
 
-      <form onSubmit={(e) => e.preventDefault } className="w-[28%] p-[4%] absolute bg-black my-[10%] mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80">
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="w-[28%] p-[4%] absolute bg-black my-[10%] mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80"
+      >
         <h1 className="font-bold text-3xl py-4">{label}</h1>
         {label === "Sign Up" && (
           <input
+            ref={name}
             type="text"
             placeholder="Username"
             className="p-6 my-2 w-full rounded-md bg-slate-700 bg-opacity-70"
@@ -60,8 +132,7 @@ const Login = () => {
           <p className="font-semibold text-xl text-gray-400">
             New to Netflix?{" "}
             <a
-              href="#"
-              className="font-semibold text-white text-xl hover:underline"
+              className="font-semibold text-white text-xl hover:underline cursor-pointer"
               onClick={() => {
                 setLabel("Sign Up");
                 setIsSignUp(true);
@@ -75,8 +146,7 @@ const Login = () => {
           <p className="font-semibold text-xl text-gray-400">
             Already have account!{" "}
             <a
-              href="#"
-              className="font-semibold text-white text-xl hover:underline"
+              className="font-semibold text-white text-xl hover:underline cursor-pointer"
               onClick={() => {
                 setLabel("Sign In");
                 setIsSignUp(false);
