@@ -12,7 +12,7 @@ const Header = ({ browse }) => {
   const user = useSelector((store) => store.user);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+   const unSubcribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         const { uid, email, displayName, photoURL } = user;
         dispatch(
@@ -30,6 +30,8 @@ const Header = ({ browse }) => {
         navigate("/");
       }
     });
+
+    return () => unSubcribe();
   }, []);
   const handleSignOut = () => {
     signOut(auth)
