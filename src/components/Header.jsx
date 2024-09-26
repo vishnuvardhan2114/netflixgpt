@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { addUser, removeUser } from "../utils/userSlice";
 import { useDispatch } from "react-redux";
+import { LOGO_URL } from "../utils/constants";
 
 const Header = ({ browse }) => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const Header = ({ browse }) => {
         <div className=" w-screen px-8 py-2 bg-gradient-to-b from-gray-900 z-10 flex justify-between fixed">
           <img
             className="w-[10%] cursor-pointer h-[10%] "
-            src="https://cdn.cookielaw.org/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-053c-46d2-b11e-09adaef973dc/Netflix_Logo_PMS.png"
+            src= {LOGO_URL}
             alt="logo"
             href="/"
           />
@@ -68,7 +69,7 @@ const Header = ({ browse }) => {
         <div className="absolute px-8 py-2 bg-gradient-to-b from-gray-900 z-10">
           <img
             className="w-72 cursor-pointer mx-[55%] "
-            src="https://cdn.cookielaw.org/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-053c-46d2-b11e-09adaef973dc/Netflix_Logo_PMS.png"
+            src={LOGO_URL}
             alt="logo"
             href="/"
           />
